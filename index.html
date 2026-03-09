@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Galileo — Jeu de géolocalisation par satellite. Reconnaissez l'endroit, placez votre réponse, marquez des points." />
+  <title>Galileo — Géolocalisation par satellite</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <div class="lp-stars" aria-hidden="true"></div>
+  <div class="lp-ambient" aria-hidden="true"></div>
+
+  <div class="lp-wrap">
+
+    <header class="lp-header">
+      <div class="lp-logo">GALILEO</div>
+      <nav class="lp-nav">
+        <a href="#how-to-play">Comment jouer</a>
+      </nav>
+    </header>
+
+    <main>
+
+      <section class="lp-hero">
+        <span class="lp-eyebrow">Géolocalisation par satellite</span>
+        <h1 class="lp-title">GALILEO</h1>
+        <p class="lp-tagline">
+          Reconnaissez l'endroit. Placez votre réponse.<br>
+          Marquez des points.
+        </p>
+      </section>
+
+      <section class="lp-modes">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <p class="lp-modes-label">Choisissez un mode</p>
+          <span class="info-btn">i
+            <span class="info-tooltip">
+              Chaque partie = <strong>5 manches</strong>.<br>
+              Démarrez à <strong>~10 km (×5)</strong>.<br>
+              Pendant une manche, zoomez librement — mais le multiplicateur ne <strong>remonte jamais</strong>.<br>
+              Max : <strong>5 000 pts</strong> par manche.
+            </span>
+          </span>
+        </div>
+
+        <div class="modes-grid" id="modes-grid">
+
+          <button class="mode-card sel" data-mode="world" onclick="selectMode(this,'world')">
+            <div class="mc-tag">Classique</div>
+            <div class="mc-name">Monde libre</div>
+            <div class="mc-desc">60 lieux à travers la planète entière, tous continents confondus.</div>
+            <div class="mc-count">60 lieux · Tous continents</div>
+          </button>
+
+          <button class="mode-card" data-mode="capitals" onclick="selectMode(this,'capitals')">
+            <div class="mc-tag">Capitales</div>
+            <div class="mc-name">Capitales</div>
+            <div class="mc-desc">La vue satellite montre une capitale. Cliquez la bonne parmi 145 pins.</div>
+            <div class="mc-count">145 capitales · Mode pin</div>
+          </button>
+
+          <button class="mode-card" data-mode="france" onclick="selectMode(this,'france')">
+            <div class="mc-tag">France</div>
+            <div class="mc-name">Villes de France</div>
+            <div class="mc-desc">10 grandes métropoles françaises vues du ciel.</div>
+            <div class="mc-count">10 villes · Hexagone</div>
+          </button>
+
+          <button class="mode-card" data-mode="europe" onclick="selectMode(this,'europe')">
+            <div class="mc-tag">Europe</div>
+            <div class="mc-name">Villes d'Europe</div>
+            <div class="mc-desc">10 villes emblématiques du continent européen.</div>
+            <div class="mc-count">10 villes · Continent</div>
+          </button>
+
+        </div>
+
+        <button class="btn-play" id="btn-play" onclick="play()">JOUER</button>
+      </section>
+
+      <section class="lp-how" id="how-to-play">
+        <div class="how-inner">
+          <p class="how-title">Comment jouer</p>
+          <div class="how-steps">
+            <div class="how-step">
+              <div class="how-num">01</div>
+              <div class="how-text">
+                <strong>Observez</strong>
+                Une vue satellite sans labels ni indices s'affiche. Analysez le terrain, les côtes, les structures urbaines.
+              </div>
+            </div>
+            <div class="how-sep">—</div>
+            <div class="how-step">
+              <div class="how-num">02</div>
+              <div class="how-text">
+                <strong>Devinez</strong>
+                Placez un pin sur le planisphère. En mode Capitales, cliquez directement la bonne capitale parmi les pins.
+              </div>
+            </div>
+            <div class="how-sep">—</div>
+            <div class="how-step">
+              <div class="how-num">03</div>
+              <div class="how-text">
+                <strong>Scorez</strong>
+                Plus vous êtes précis, plus vous marquez. Zoomez en arrière pour plus de contexte — mais le multiplicateur baisse définitivement.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <script>
+    let selectedMode = 'world';
+
+    function selectMode(el, mode) {
+      document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('sel'));
+      el.classList.add('sel');
+      selectedMode = mode;
+    }
+
+    function play() {
+      window.location.href = 'game.html?mode=' + selectedMode;
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,372 @@
+import { haversine, scoreFor } from './scoring.js';
+import { LOCS }          from '../data/world.js';
+import { CAPITALS }      from '../data/capitals.js';
+import { FRANCE_CITIES } from '../data/france.js';
+import { EUROPE_CITIES } from '../data/europe.js';
+
+/* ════════════════════════════════════════════════
+   ZOOM STEPS
+════════════════════════════════════════════════ */
+const ZOOM_STEPS = [
+  { z: 13, km: '10',  mult: 5, label: 'Extrême'     },
+  { z: 11, km: '50',  mult: 4, label: 'Difficile'   },
+  { z: 10, km: '100', mult: 3, label: 'Normal'      },
+  { z:  9, km: '200', mult: 2, label: 'Facile'      },
+  { z:  8, km: '500', mult: 1, label: 'Très facile' },
+];
+
+function multForZoom(z) {
+  return ZOOM_STEPS.find(s => s.z === z).mult;
+}
+
+/* ════════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════════ */
+let gameMode = 'world';
+
+let round      = 0;
+let totalScore = 0;
+let results    = [];
+let usedIdx    = [];
+let target     = null;
+let guess      = null;
+let gMarker    = null;
+
+// per-round zoom/mult
+let roundZoom = 13;
+let roundMult = 5;
+
+// capitals mode
+let capitalMarkers    = [];
+let selectedCapMarker = null;
+let guessCapLabel     = null;
+
+// Leaflet instances
+let satMap   = null;
+let guessMap = null;
+let rrMap    = null;
+
+/* ════════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  gameMode = new URLSearchParams(window.location.search).get('mode') || 'world';
+
+  document.getElementById('confirm-btn').addEventListener('click', confirmGuess);
+  document.getElementById('btn-next').addEventListener('click', nextRound);
+  document.getElementById('btn-replay').addEventListener('click', () => {
+    // Reset and restart same mode
+    round = 0; totalScore = 0; results = []; usedIdx = [];
+    document.getElementById('result').classList.remove('on');
+    startGame();
+  });
+
+  startGame();
+});
+
+/* ════════════════════════════════════════════════
+   UTILS
+════════════════════════════════════════════════ */
+function kill(map) {
+  if (map) map.remove();
+  return null;
+}
+
+function mkPinIcon(cls) {
+  return L.divIcon({
+    className: '',
+    html: `<div class="${cls}"></div>`,
+    iconSize:   [16, 16],
+    iconAnchor: [8, 8],
+  });
+}
+
+function pickLoc() {
+  const pool =
+    gameMode === 'capitals' ? CAPITALS      :
+    gameMode === 'france'   ? FRANCE_CITIES :
+    gameMode === 'europe'   ? EUROPE_CITIES :
+    LOCS;
+  let i;
+  do { i = Math.floor(Math.random() * pool.length); } while (usedIdx.includes(i));
+  usedIdx.push(i);
+  return pool[i];
+}
+
+/* ════════════════════════════════════════════════
+   GAME FLOW
+════════════════════════════════════════════════ */
+function startGame() {
+  beginRound();
+}
+
+function beginRound() {
+  round++;
+  guess = null; gMarker = null;
+  target    = pickLoc();
+  roundZoom = 13;
+  roundMult = multForZoom(13);
+
+  // Header
+  document.getElementById('round-lbl').textContent  = `Manche ${round} / 5`;
+  document.getElementById('score-val').textContent  = totalScore.toLocaleString('fr');
+  document.getElementById('mult-tag').textContent   = `×${roundMult}`;
+  document.getElementById('mult-tag').classList.remove('drop');
+  document.getElementById('guess-badge').textContent =
+    gameMode === 'capitals' ? 'Identifiez la capitale' :
+    (gameMode === 'france' || gameMode === 'europe') ? 'Trouvez la ville' :
+    'Placez votre pin';
+  document.getElementById('confirm-btn').classList.remove('on');
+
+  // Round dots
+  const dotsEl = document.getElementById('round-dots');
+  dotsEl.innerHTML = '';
+  for (let i = 1; i <= 5; i++) {
+    const d = document.createElement('div');
+    d.className = 'rd' + (i < round ? ' done' : i === round ? ' current' : '');
+    dotsEl.appendChild(d);
+  }
+
+  // Reset capitals state
+  capitalMarkers = []; selectedCapMarker = null; guessCapLabel = null;
+
+  // Destroy old maps
+  satMap   = kill(satMap);
+  guessMap = kill(guessMap);
+
+  // Satellite view (locked)
+  satMap = L.map('sat-map', {
+    center: [target.lat, target.lng],
+    zoom: roundZoom,
+    zoomControl: false, attributionControl: false,
+    dragging: false, touchZoom: false, doubleClickZoom: false,
+    scrollWheelZoom: false, boxZoom: false, keyboard: false,
+  });
+  L.tileLayer(
+    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    { maxZoom: 19 }
+  ).addTo(satMap);
+
+  // Guess map
+  const guessCenter =
+    gameMode === 'france'  ? [46.5,  2.5] :
+    gameMode === 'europe'  ? [50.0, 10.0] :
+    [20, 0];
+  const guessZoom =
+    gameMode === 'france'  ? 5 :
+    gameMode === 'europe'  ? 4 :
+    2;
+
+  guessMap = L.map('guess-map', {
+    center: guessCenter, zoom: guessZoom, minZoom: 2, attributionControl: false,
+  });
+  L.tileLayer(
+    'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',
+    { maxZoom: 19, subdomains: 'abcd' }
+  ).addTo(guessMap);
+
+  if (gameMode === 'capitals') {
+    buildCapitalMarkers();
+  } else {
+    guessMap.on('click', e => {
+      guess = e.latlng;
+      if (gMarker) guessMap.removeLayer(gMarker);
+      gMarker = L.marker(e.latlng, { icon: mkPinIcon('pin-guess') }).addTo(guessMap);
+      document.getElementById('confirm-btn').classList.add('on');
+    });
+  }
+
+  buildZoomSw();
+}
+
+/* ════════════════════════════════════════════════
+   ZOOM SWITCHER
+════════════════════════════════════════════════ */
+function buildZoomSw() {
+  const sw = document.getElementById('zoom-sw');
+  sw.innerHTML = '';
+  ZOOM_STEPS.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'zsw';
+    btn.dataset.z = s.z;
+    btn.innerHTML = `<span class="zsw-mult">×${s.mult}</span><span class="zsw-km">~${s.km}km</span>`;
+    btn.addEventListener('click', () => switchZoom(s.z));
+    sw.appendChild(btn);
+  });
+  refreshZoomSw();
+}
+
+function refreshZoomSw() {
+  document.querySelectorAll('.zsw').forEach(btn => {
+    const z = +btn.dataset.z;
+    const m = multForZoom(z);
+    btn.classList.toggle('active',  z === roundZoom);
+    btn.classList.toggle('costly', m < roundMult);
+  });
+}
+
+function switchZoom(z) {
+  const newMult   = multForZoom(z);
+  const decreased = newMult < roundMult;
+  roundZoom = z;
+  satMap.setZoom(z);
+
+  if (decreased) {
+    roundMult = newMult;
+    const tag = document.getElementById('mult-tag');
+    tag.textContent = `×${roundMult}`;
+    tag.classList.remove('drop');
+    void tag.offsetWidth;
+    tag.classList.add('drop');
+  }
+
+  refreshZoomSw();
+}
+
+/* ════════════════════════════════════════════════
+   CAPITALS MAP
+════════════════════════════════════════════════ */
+function buildCapitalMarkers() {
+  const STYLE_NORMAL   = { radius: 4, fillColor: '#4a5a7a', fillOpacity: 0.9, color: '#07090f', weight: 1 };
+  const STYLE_HOVER    = { radius: 6, fillColor: '#7a8db0', fillOpacity: 1,   color: '#fff',    weight: 1 };
+  const STYLE_SELECTED = { radius: 8, fillColor: '#f0bb3a', fillOpacity: 1,   color: '#fff',    weight: 2 };
+
+  CAPITALS.forEach(cap => {
+    const m = L.circleMarker([cap.lat, cap.lng], { ...STYLE_NORMAL, interactive: true })
+      .addTo(guessMap);
+    m._capData = cap;
+
+    m.on('mouseover', () => { if (m !== selectedCapMarker) m.setStyle(STYLE_HOVER); });
+    m.on('mouseout',  () => { if (m !== selectedCapMarker) m.setStyle(STYLE_NORMAL); });
+    m.on('click', e => {
+      L.DomEvent.stopPropagation(e);
+      if (selectedCapMarker && selectedCapMarker !== m) {
+        selectedCapMarker.setStyle(STYLE_NORMAL);
+      }
+      selectedCapMarker = m;
+      m.setStyle(STYLE_SELECTED);
+      guess         = m.getLatLng();
+      guessCapLabel = cap.label;
+      document.getElementById('confirm-btn').classList.add('on');
+    });
+
+    capitalMarkers.push(m);
+  });
+}
+
+/* ════════════════════════════════════════════════
+   CONFIRM
+════════════════════════════════════════════════ */
+function confirmGuess() {
+  if (!guess) return;
+
+  const km  = Math.round(haversine(guess.lat, guess.lng, target.lat, target.lng));
+  const pts = scoreFor(km, roundMult);
+  totalScore += pts;
+  results.push({ round, km, pts, mult: roundMult });
+
+  showOverlay(km, pts);
+}
+
+function showOverlay(km, pts) {
+  document.getElementById('ov-round').textContent = `Manche ${round}`;
+  document.getElementById('ov-loc').textContent   =
+    gameMode === 'capitals' ? `${target.label}  ←  ${guessCapLabel}` : target.label;
+  document.getElementById('ov-dist').textContent  = km.toLocaleString('fr');
+  document.getElementById('ov-mult').textContent  = `×${roundMult}`;
+  document.getElementById('ov-pts').textContent   = pts.toLocaleString('fr');
+  document.getElementById('ov-total').textContent = totalScore.toLocaleString('fr');
+  document.getElementById('btn-next').textContent =
+    round < 5 ? 'MANCHE SUIVANTE' : 'VOIR LES RÉSULTATS';
+
+  document.getElementById('round-overlay').classList.add('on');
+
+  // Mini result map
+  rrMap = kill(rrMap);
+  setTimeout(() => {
+    const wrap = document.getElementById('ov-map-wrap');
+    wrap.innerHTML = '';
+    const div = document.createElement('div');
+    div.style.cssText = 'width:100%;height:100%;';
+    wrap.appendChild(div);
+
+    rrMap = L.map(div, {
+      zoomControl: false, attributionControl: false,
+      dragging: false, scrollWheelZoom: false,
+    });
+    L.tileLayer(
+      'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',
+      { maxZoom: 19, subdomains: 'abcd' }
+    ).addTo(rrMap);
+
+    L.marker([target.lat, target.lng], { icon: mkPinIcon('pin-target') }).addTo(rrMap);
+    L.marker([guess.lat,  guess.lng],  { icon: mkPinIcon('pin-guess')  }).addTo(rrMap);
+
+    L.polyline(
+      [[target.lat, target.lng], [guess.lat, guess.lng]],
+      { color: '#f0bb3a', weight: 2, dashArray: '7 6', opacity: 0.85 }
+    ).addTo(rrMap);
+
+    rrMap.fitBounds(
+      L.latLngBounds([target.lat, target.lng], [guess.lat, guess.lng]),
+      { padding: [36, 36], maxZoom: 8 }
+    );
+  }, 60);
+}
+
+/* ════════════════════════════════════════════════
+   NEXT / END
+════════════════════════════════════════════════ */
+function nextRound() {
+  document.getElementById('round-overlay').classList.remove('on');
+  rrMap = kill(rrMap);
+  if (round < 5) {
+    beginRound();
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  satMap   = kill(satMap);
+  guessMap = kill(guessMap);
+
+  const avgKm = Math.round(results.reduce((s, r) => s + r.km, 0) / results.length);
+  document.getElementById('final-score').textContent = totalScore.toLocaleString('fr');
+  document.getElementById('final-avg').textContent   = avgKm.toLocaleString('fr');
+  document.getElementById('res-mode-tag').textContent =
+    gameMode === 'capitals' ? 'Mode Capitales'       :
+    gameMode === 'france'   ? 'Mode Villes de France':
+    gameMode === 'europe'   ? "Mode Villes d'Europe" :
+    'Mode Monde libre';
+
+  const list = document.getElementById('rounds-list');
+  list.innerHTML = '';
+  results.forEach(r => {
+    const pct        = (r.pts / 5000) * 100;
+    const multColor  =
+      r.mult === 5 ? 'var(--accent)'   :
+      r.mult === 4 ? 'var(--accent-d)' :
+      r.mult === 3 ? 'var(--text)'     :
+      r.mult === 2 ? 'var(--text2)'    :
+                     'var(--text3)';
+    const row = document.createElement('div');
+    row.className = 'rr-row';
+    row.innerHTML = `
+      <div class="rr-n">${r.round}</div>
+      <div class="rr-sc">${r.pts.toLocaleString('fr')} pts</div>
+      <div class="rr-km">${r.km.toLocaleString('fr')} km</div>
+      <div class="rr-mult" style="color:${multColor}">×${r.mult}</div>
+      <div class="rr-bar-wrap"><div class="rr-bar" data-pct="${pct}"></div></div>
+    `;
+    list.appendChild(row);
+  });
+
+  document.getElementById('result').classList.add('on');
+
+  setTimeout(() => {
+    document.querySelectorAll('.rr-bar').forEach(b => {
+      b.style.width = b.dataset.pct + '%';
+    });
+  }, 120);
+}

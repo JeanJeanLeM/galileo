@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Galileo — Jouer</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Leaflet must load before game.js uses window.L -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body class="game-page">
+
+  <!-- ── Game screen ── -->
+  <div id="game">
+
+    <div class="game-header">
+      <div class="gh-left">
+        <a class="gh-back" href="index.html" title="Retour à l'accueil">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Accueil
+        </a>
+        <div class="gh-logo">GALILEO</div>
+      </div>
+
+      <div class="gh-center">
+        <div class="round-dots" id="round-dots"></div>
+        <span class="round-lbl" id="round-lbl">Manche 1 / 5</span>
+      </div>
+
+      <div class="gh-right">
+        <div class="mult-tag" id="mult-tag">×5</div>
+        <div class="gh-score">Score : <strong id="score-val">0</strong></div>
+      </div>
+    </div>
+
+    <div class="game-body">
+
+      <div class="sat-panel">
+        <div id="sat-map"></div>
+        <div class="map-badge">Vue satellite</div>
+        <div id="zoom-sw"></div>
+      </div>
+
+      <div class="guess-panel">
+        <div id="guess-map"></div>
+        <div class="map-badge" id="guess-badge">Placez votre pin</div>
+        <button id="confirm-btn">CONFIRMER</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Round overlay ── -->
+  <div id="round-overlay">
+    <div class="ov-card">
+
+      <div class="ov-head">
+        <div>
+          <div class="ov-title">Résultat</div>
+          <div class="ov-round" id="ov-round">Manche 1</div>
+        </div>
+        <div class="ov-loc" id="ov-loc"></div>
+      </div>
+
+      <div class="ov-stats">
+        <div class="stat blue">
+          <div class="val" id="ov-dist">—</div>
+          <div class="lbl">Distance (km)</div>
+        </div>
+        <div class="stat dim">
+          <div class="val" id="ov-mult">—</div>
+          <div class="lbl">Multiplicateur</div>
+        </div>
+        <div class="stat">
+          <div class="val" id="ov-pts">—</div>
+          <div class="lbl">Points</div>
+        </div>
+        <div class="stat green">
+          <div class="val" id="ov-total">—</div>
+          <div class="lbl">Total cumulé</div>
+        </div>
+      </div>
+
+      <div id="ov-map-wrap"></div>
+
+      <div class="ov-legend">
+        <div class="leg-item"><div class="leg-dot blue"></div> Votre réponse</div>
+        <div class="leg-item"><div class="leg-dot green"></div> Bonne position</div>
+      </div>
+
+      <button id="btn-next">MANCHE SUIVANTE</button>
+
+    </div>
+  </div>
+
+  <!-- ── Result screen ── -->
+  <div id="result">
+
+    <div class="res-header">
+      <div class="res-logo">GALILEO</div>
+      <div class="res-sub">Partie terminée</div>
+      <div class="res-mode-tag" id="res-mode-tag"></div>
+    </div>
+
+    <div class="res-main">
+      <div class="res-stat">
+        <div class="val" id="final-score">—</div>
+        <div class="lbl">Score total / 25 000</div>
+      </div>
+      <div class="res-stat">
+        <div class="val" id="final-avg">—</div>
+        <div class="lbl">Distance moyenne (km)</div>
+      </div>
+    </div>
+
+    <div class="res-breakdown">
+      <h3>Détail par manche</h3>
+      <div id="rounds-list"></div>
+    </div>
+
+    <div class="res-actions">
+      <button class="btn-replay" id="btn-replay">REJOUER</button>
+      <a class="btn-home" href="index.html">Changer de mode</a>
+    </div>
+
+  </div>
+
+  <script type="module" src="js/game.js"></script>
+
+</body>
+</html>
