@@ -146,6 +146,7 @@ function beginRound() {
     'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
     { maxZoom: 19 }
   ).addTo(satMap);
+  setTimeout(() => satMap.invalidateSize(), 0);
 
   // Guess map
   const guessCenter =
@@ -164,6 +165,7 @@ function beginRound() {
     'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',
     { maxZoom: 19, subdomains: 'abcd' }
   ).addTo(guessMap);
+  setTimeout(() => guessMap.invalidateSize(), 0);
 
   if (gameMode === 'capitals') {
     buildCapitalMarkers();
