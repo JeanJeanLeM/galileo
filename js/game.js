@@ -41,6 +41,10 @@ let capitalMarkers    = [];
 let selectedCapMarker = null;
 let guessCapLabel     = null;
 
+// hint system
+let hintUsed    = false;
+let hintMarkers = [];
+
 // Leaflet instances
 let satMap   = null;
 let guessMap = null;
@@ -53,6 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
   gameMode = new URLSearchParams(window.location.search).get('mode') || 'world';
 
   document.getElementById('confirm-btn').addEventListener('click', confirmGuess);
+  document.getElementById('hint-btn').addEventListener('click', showHint);
   document.getElementById('btn-next').addEventListener('click', nextRound);
   document.getElementById('btn-replay').addEventListener('click', () => {
     // Reset and restart same mode
@@ -129,6 +134,18 @@ function beginRound() {
 
   // Reset capitals state
   capitalMarkers = []; selectedCapMarker = null; guessCapLabel = null;
+
+  // Reset hint state
+  hintUsed = false; hintMarkers = [];
+  const hintBtn = document.getElementById('hint-btn');
+  hintBtn.classList.remove('used');
+  hintBtn.innerHTML = `
+    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+      <circle cx="6.5" cy="6.5" r="5.75" stroke="currentColor" stroke-width="1.3"/>
+      <path d="M4.8 4.9C4.8 4 5.6 3.2 6.5 3.2C7.4 3.2 8.2 4 8.2 4.9C8.2 5.8 7.1 6.3 6.5 7.1V7.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+      <circle cx="6.5" cy="9.5" r="0.65" fill="currentColor"/>
+    </svg>
+    Indices`;
 
   // Destroy old maps
   satMap   = kill(satMap);
@@ -254,6 +271,48 @@ function buildCapitalMarkers() {
 
     capitalMarkers.push(m);
   });
+}
+
+/* ════════════════════════════════════════════════
+   HINT
+════════════════════════════════════════════════ */
+function showHint() {
+  if (hintUsed) return;
+  hintUsed = true;
+
+  const pool =
+    gameMode === 'capitals' ? CAPITALS      :
+    gameMode === 'france'   ? FRANCE_CITIES :
+    gameMode === 'europe'   ? EUROPE_CITIES :
+    LOCS;
+
+  const tooltipOpts = { permanent: false, direction: 'top', className: 'hint-tooltip', opacity: 1 };
+
+  if (gameMode === 'capitals') {
+    // Capital circles are already on the map — just bind name tooltips to each
+    capitalMarkers.forEach(m => {
+      m.bindTooltip(m._capData.label, tooltipOpts);
+    });
+  } else {
+    // Show all pool locations as faint dots with name on hover
+    pool.forEach(loc => {
+      const m = L.circleMarker([loc.lat, loc.lng], {
+        radius: 5,
+        fillColor: '#4a6a9a',
+        fillOpacity: 0.75,
+        color: 'rgba(255,255,255,0.18)',
+        weight: 1.5,
+        interactive: true,
+      })
+        .bindTooltip(loc.label, tooltipOpts)
+        .addTo(guessMap);
+      hintMarkers.push(m);
+    });
+  }
+
+  const hintBtn = document.getElementById('hint-btn');
+  hintBtn.classList.add('used');
+  hintBtn.textContent = 'Indices affichés';
 }
 
 /* ════════════════════════════════════════════════
