@@ -2,6 +2,7 @@
  * Mode Chronologie : lieux avec imagerie Esri live + Wayback.
  * Chaque lieu peut définir `eras` (ordre des boutons). Défaut : Actuel → 2020 → 2014.
  * Feux : avant / pendant / après. Sécheresse : clichés 2018+ (IDs = waybackconfig Esri).
+ * Glaciers / Alpes : été (peu de neige basse altitude) → hiver (enneigement) → actuel.
  */
 
 export const DEFAULT_TIMELINE_ERAS = [
@@ -27,6 +28,13 @@ const DROUGHT_EU_ERAS = [
 const DROUGHT_MA_ERAS = [
   { key: 'dry23', label: 'Sécheresse', sub: 'août 2023', releaseNum: 64776 },
   { key: 'wet24', label: 'Pluies', sub: 'juin 2024', releaseNum: 39767 },
+  { key: 'live', label: 'Actuel', sub: "aujourd'hui", releaseNum: null },
+];
+
+/** Alpes : 64776 = août 2023 (fonte / moins de neige) ; 56102 = déc. 2023 (enneigement) */
+const GLACIER_ALPS_ERAS = [
+  { key: 'sum23', label: 'Été', sub: 'août 2023', releaseNum: 64776 },
+  { key: 'win23', label: 'Hiver', sub: 'déc. 2023', releaseNum: 56102 },
   { key: 'live', label: 'Actuel', sub: "aujourd'hui", releaseNum: null },
 ];
 
@@ -119,28 +127,72 @@ export const TIMELINE_DROUGHT = [
   },
 ];
 
+/**
+ * Glaciers & haute montagne alpine : contraste saisonnier sur imagerie (neige / roche exposée).
+ */
+export const TIMELINE_GLACIER = [
+  {
+    lat: 45.933,
+    lng: 6.919,
+    label: 'France — Mer de Glace (massif du Mont-Blanc)',
+    theme: 'glacier',
+    eras: GLACIER_ALPS_ERAS,
+  },
+  {
+    lat: 46.443,
+    lng: 8.07,
+    label: 'Suisse — glacier d’Aletsch (Alpes bernoises)',
+    theme: 'glacier',
+    eras: GLACIER_ALPS_ERAS,
+  },
+  {
+    lat: 46.573,
+    lng: 8.391,
+    label: 'Suisse — glacier du Rhône (Furkapass)',
+    theme: 'glacier',
+    eras: GLACIER_ALPS_ERAS,
+  },
+  {
+    lat: 46.409,
+    lng: 9.931,
+    label: 'Suisse — glacier de Morteratsch (Engadine)',
+    theme: 'glacier',
+    eras: GLACIER_ALPS_ERAS,
+  },
+  {
+    lat: 47.08,
+    lng: 12.73,
+    label: 'Autriche — glacier de la Pasterze (Glockner)',
+    theme: 'glacier',
+    eras: GLACIER_ALPS_ERAS,
+  },
+];
+
 const POOLS = {
   all: () => [
     ...TIMELINE_URBAN,
     ...TIMELINE_DEFORESTATION,
     ...TIMELINE_WILDFIRE,
     ...TIMELINE_DROUGHT,
+    ...TIMELINE_GLACIER,
   ],
   urban: () => [...TIMELINE_URBAN],
   deforestation: () => [...TIMELINE_DEFORESTATION],
   wildfire: () => [...TIMELINE_WILDFIRE],
   drought: () => [...TIMELINE_DROUGHT],
+  glacier: () => [...TIMELINE_GLACIER],
 };
 
 /**
- * @param {'all'|'urban'|'deforestation'|'wildfire'|'drought'} theme
+ * @param {'all'|'urban'|'deforestation'|'wildfire'|'drought'|'glacier'} theme
  */
 export function getTimelinePool(theme) {
   const t =
     theme === 'urban' ||
     theme === 'deforestation' ||
     theme === 'wildfire' ||
-    theme === 'drought'
+    theme === 'drought' ||
+    theme === 'glacier'
       ? theme
       : 'all';
   return POOLS[t]();

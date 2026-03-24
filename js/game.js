@@ -32,7 +32,7 @@ function multForZoom(z) {
    STATE
 ════════════════════════════════════════════════ */
 let gameMode = 'world';
-/** Thème chronologie : all | urban | wildfire | deforestation | drought */
+/** Thème chronologie : all | urban | wildfire | deforestation | drought | glacier */
 let timelineTheme = 'all';
 
 let round      = 0;
@@ -133,7 +133,9 @@ function beginRound() {
   if (gameMode === 'timeline') {
     activeTimelineEras = target.eras || DEFAULT_TIMELINE_ERAS;
     timelineEraIndex =
-      target.theme === 'wildfire' || target.theme === 'drought'
+      target.theme === 'wildfire' ||
+      target.theme === 'drought' ||
+      target.theme === 'glacier'
         ? activeTimelineEras.length - 1
         : 0;
   } else {
@@ -501,7 +503,9 @@ function showResult() {
               ? 'Chronologie — déforestation'
               : timelineTheme === 'drought'
                 ? 'Chronologie — sécheresse & pluies'
-                : 'Chronologie — tous thèmes')
+                : timelineTheme === 'glacier'
+                  ? 'Chronologie — glaciers & neige'
+                  : 'Chronologie — tous thèmes')
       : 'Mode Monde libre';
 
   const list = document.getElementById('rounds-list');
