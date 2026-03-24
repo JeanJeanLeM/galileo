@@ -10,7 +10,7 @@ Jeu de géolocalisation par satellite. Une vue satellite s'affiche — à toi de
 | **Capitales** | 145 capitales à identifier parmi des pins sur la carte |
 | **Villes de France** | 10 grandes métropoles françaises |
 | **Villes d'Europe** | 10 villes emblématiques du continent |
-| **Chronologie** | Sous-thèmes : tout (13), urbanisation (8), feux (3), déforestation (2). Feux : avant / pendant (2020 Wayback) / après quand dispo ; Canada 2023 sans « pendant ». Multiplicateur = **zoom** uniquement. |
+| **Chronologie** | Sous-thèmes : tout (18), urbanisation (8), feux (3), déforestation (2), **sécheresse & pluies** (5). Sécheresse : Wayback **août 2022** (EU) ou **août 2023** (Maroc) → **juin 2024** → actuel. Multiplicateur = **zoom** uniquement. |
 
 ## Mécanique de score
 

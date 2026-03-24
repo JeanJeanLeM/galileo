@@ -1,7 +1,7 @@
 /**
  * Mode Chronologie : lieux avec imagerie Esri live + Wayback.
  * Chaque lieu peut définir `eras` (ordre des boutons). Défaut : Actuel → 2020 → 2014.
- * Feux : avant / pendant / après quand les clichés Wayback le permettent.
+ * Feux : avant / pendant / après. Sécheresse : clichés 2018+ (IDs = waybackconfig Esri).
  */
 
 export const DEFAULT_TIMELINE_ERAS = [
@@ -15,6 +15,20 @@ const E = {
   pendant: { key: '2020', label: 'Pendant', sub: '2020', releaseNum: 29260 },
   apres:   { key: 'live', label: 'Après', sub: 'actuel', releaseNum: null },
 };
+
+/** Europe de l’Ouest / bassin méditerranéen : canicule & sécheresse 2022 → pluies & verdissement mi-2024 → actuel */
+const DROUGHT_EU_ERAS = [
+  { key: 'dry22', label: 'Sécheresse', sub: 'août 2022', releaseNum: 45441 },
+  { key: 'wet24', label: 'Pluies', sub: 'juin 2024', releaseNum: 39767 },
+  { key: 'live', label: 'Actuel', sub: "aujourd'hui", releaseNum: null },
+];
+
+/** Maroc : sécheresse marquée 2023 → même cliché « humide » proxy juin 2024 → actuel (hivers pluvieux / reverdissement) */
+const DROUGHT_MA_ERAS = [
+  { key: 'dry23', label: 'Sécheresse', sub: 'août 2023', releaseNum: 64776 },
+  { key: 'wet24', label: 'Pluies', sub: 'juin 2024', releaseNum: 39767 },
+  { key: 'live', label: 'Actuel', sub: "aujourd'hui", releaseNum: null },
+];
 
 /** Urbanisation — gratte-ciels, littoraux aménagés, etc. */
 export const TIMELINE_URBAN = [
@@ -63,18 +77,72 @@ export const TIMELINE_WILDFIRE = [
   },
 ];
 
+/**
+ * Sécheresse puis retour pluvieux (Wayback ≥ 2018 ; pas de clichés avant 2014 ici).
+ * FR / IT / PT : pic de sécheresse estival 2022 vs juin 2024. MA : août 2023 vs juin 2024.
+ */
+export const TIMELINE_DROUGHT = [
+  {
+    lat: 34.12,
+    lng: -6.42,
+    label: 'Maroc — plaine du Gharb (céréales), sécheresse puis pluies & reverdissement',
+    theme: 'drought',
+    eras: DROUGHT_MA_ERAS,
+  },
+  {
+    lat: 46.42,
+    lng: -0.78,
+    label: 'France — ouest (Niort / Marais poitevin), sécheresse 2022 puis années plus humides',
+    theme: 'drought',
+    eras: DROUGHT_EU_ERAS,
+  },
+  {
+    lat: 44.527,
+    lng: 6.326,
+    label: 'France — lac de Serre-Ponçon (niveau d’eau visible selon les années)',
+    theme: 'drought',
+    eras: DROUGHT_EU_ERAS,
+  },
+  {
+    lat: 45.13,
+    lng: 9.73,
+    label: 'Italie — plaine du Pô (stress hydrique estival 2022 vs 2024)',
+    theme: 'drought',
+    eras: DROUGHT_EU_ERAS,
+  },
+  {
+    lat: 38.05,
+    lng: -7.88,
+    label: 'Portugal — Alentejo (sécheresse 2022 puis contraste plus tardif)',
+    theme: 'drought',
+    eras: DROUGHT_EU_ERAS,
+  },
+];
+
 const POOLS = {
-  all: () => [...TIMELINE_URBAN, ...TIMELINE_DEFORESTATION, ...TIMELINE_WILDFIRE],
+  all: () => [
+    ...TIMELINE_URBAN,
+    ...TIMELINE_DEFORESTATION,
+    ...TIMELINE_WILDFIRE,
+    ...TIMELINE_DROUGHT,
+  ],
   urban: () => [...TIMELINE_URBAN],
   deforestation: () => [...TIMELINE_DEFORESTATION],
   wildfire: () => [...TIMELINE_WILDFIRE],
+  drought: () => [...TIMELINE_DROUGHT],
 };
 
 /**
- * @param {'all'|'urban'|'deforestation'|'wildfire'} theme
+ * @param {'all'|'urban'|'deforestation'|'wildfire'|'drought'} theme
  */
 export function getTimelinePool(theme) {
-  const t = theme === 'urban' || theme === 'deforestation' || theme === 'wildfire' ? theme : 'all';
+  const t =
+    theme === 'urban' ||
+    theme === 'deforestation' ||
+    theme === 'wildfire' ||
+    theme === 'drought'
+      ? theme
+      : 'all';
   return POOLS[t]();
 }
 
