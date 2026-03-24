@@ -32,7 +32,7 @@ function multForZoom(z) {
    STATE
 ════════════════════════════════════════════════ */
 let gameMode = 'world';
-/** Thème chronologie : all | urban | wildfire | deforestation | drought | glacier | dam */
+/** Thème chronologie : all | urban | deforestation | glacier | us_bases_me */
 let timelineTheme = 'all';
 
 let round      = 0;
@@ -110,6 +110,7 @@ function pickLoc() {
     gameMode === 'europe'   ? EUROPE_CITIES :
     gameMode === 'timeline' ? getTimelinePool(timelineTheme) :
     LOCS;
+  if (usedIdx.length >= pool.length) usedIdx = [];
   let i;
   do { i = Math.floor(Math.random() * pool.length); } while (usedIdx.includes(i));
   usedIdx.push(i);
@@ -133,10 +134,7 @@ function beginRound() {
   if (gameMode === 'timeline') {
     activeTimelineEras = target.eras || DEFAULT_TIMELINE_ERAS;
     timelineEraIndex =
-      target.theme === 'wildfire' ||
-      target.theme === 'drought' ||
-      target.theme === 'glacier' ||
-      target.theme === 'dam'
+      target.theme === 'glacier' || target.theme === 'us_bases_me'
         ? activeTimelineEras.length - 1
         : 0;
   } else {
@@ -498,17 +496,13 @@ function showResult() {
     gameMode === 'timeline'
       ? (timelineTheme === 'urban'
           ? 'Chronologie — urbanisation'
-          : timelineTheme === 'wildfire'
-            ? 'Chronologie — feux de forêt'
-            : timelineTheme === 'deforestation'
-              ? 'Chronologie — déforestation'
-              : timelineTheme === 'drought'
-                ? 'Chronologie — sécheresse & pluies'
-                : timelineTheme === 'glacier'
-                  ? 'Chronologie — glaciers & neige'
-                  : timelineTheme === 'dam'
-                    ? 'Chronologie — barrages'
-                    : 'Chronologie — tous thèmes')
+          : timelineTheme === 'deforestation'
+            ? 'Chronologie — déforestation'
+            : timelineTheme === 'glacier'
+              ? 'Chronologie — glaciers & neige'
+              : timelineTheme === 'us_bases_me'
+                ? 'Chronologie — bases US (MO)'
+                : 'Chronologie — tous thèmes')
       : 'Mode Monde libre';
 
   const list = document.getElementById('rounds-list');
