@@ -32,7 +32,7 @@ function multForZoom(z) {
    STATE
 ════════════════════════════════════════════════ */
 let gameMode = 'world';
-/** Thème chronologie : all | urban | deforestation | glacier | us_bases_me */
+/** Thème chronologie : all | urban | deforestation | agriculture */
 let timelineTheme = 'all';
 
 let round      = 0;
@@ -134,7 +134,7 @@ function beginRound() {
   if (gameMode === 'timeline') {
     activeTimelineEras = target.eras || DEFAULT_TIMELINE_ERAS;
     timelineEraIndex =
-      target.theme === 'glacier' || target.theme === 'us_bases_me'
+      target.theme === 'agriculture'
         ? activeTimelineEras.length - 1
         : 0;
   } else {
@@ -498,11 +498,9 @@ function showResult() {
           ? 'Chronologie — urbanisation'
           : timelineTheme === 'deforestation'
             ? 'Chronologie — déforestation'
-            : timelineTheme === 'glacier'
-              ? 'Chronologie — glaciers & neige'
-              : timelineTheme === 'us_bases_me'
-                ? 'Chronologie — bases US (MO)'
-                : 'Chronologie — tous thèmes')
+            : timelineTheme === 'agriculture'
+              ? 'Chronologie — agriculture & irrigation'
+              : 'Chronologie — tous thèmes')
       : 'Mode Monde libre';
 
   const list = document.getElementById('rounds-list');

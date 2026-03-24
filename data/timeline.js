@@ -1,8 +1,7 @@
 /**
  * Mode Chronologie : lieux avec imagerie Esri live + Wayback.
  * Chaque lieu peut définir `eras` (ordre des boutons). Défaut : Actuel → 2020 → 2014.
- * Glaciers / Alpes : été 2014 → été 2020 → actuel (fonte comparable, pas mélange été/hiver).
- * Bases US (MO) : 2020 (Wayback) vs actuel — comparer activité sur les aires de trafic (selon qualité des tuiles).
+ * Agriculture intensive : 2014 → 2020 → actuel (expansion des périmètres irrigués, pivots, etc.).
  */
 
 export const DEFAULT_TIMELINE_ERAS = [
@@ -11,19 +10,10 @@ export const DEFAULT_TIMELINE_ERAS = [
   { key: '2014', label: '2014', sub: 'fév.', releaseNum: 10 },
 ];
 
-/**
- * Glaciers : uniquement des clichés **estivaux** (même saison → contraste = fonte / glacier, pas neige hivernale).
- * 5232 = Wayback 2014-07-30 · 6049 = Wayback 2020-08-12 (waybackconfig Esri).
- */
-const GLACIER_ALPS_ERAS = [
-  { key: 'y2014', label: '2014', sub: 'été (juil.)', releaseNum: 5232 },
-  { key: 'y2020', label: '2020', sub: 'été (août)', releaseNum: 6049 },
-  { key: 'live', label: 'Actuel', sub: "aujourd'hui", releaseNum: null },
-];
-
-/** Bases US au Moyen-Orient : décembre 2020 (même release que urbanisation) puis imagerie actuelle. */
-const US_BASE_ME_ERAS = [
-  { key: '2020', label: '2020', sub: 'déc. (Wayback)', releaseNum: 29260 },
+/** Agriculture : chronologie 2014 → 2020 → actuel (mêmes IDs Wayback que le reste du jeu). */
+const AGRI_TIMELINE_ERAS = [
+  { key: '2014', label: '2014', sub: 'fév.', releaseNum: 10 },
+  { key: '2020', label: '2020', sub: 'déc.', releaseNum: 29260 },
   { key: 'live', label: 'Actuel', sub: "aujourd'hui", releaseNum: null },
 ];
 
@@ -44,85 +34,65 @@ export const TIMELINE_DEFORESTATION = [
 ].map((loc) => ({ ...loc, eras: DEFAULT_TIMELINE_ERAS }));
 
 /**
- * Glaciers & haute montagne alpine : contraste saisonnier sur imagerie (neige / roche exposée).
+ * Irrigation de grande ampleur : pivots circulaires, périmètres gravitaires, expansion 2014–aujourd’hui.
+ * Centré sur zones visibles au zoom satellite du jeu (~13).
  */
-export const TIMELINE_GLACIER = [
+export const TIMELINE_AGRICULTURE = [
   {
-    lat: 45.933,
-    lng: 6.919,
-    label: 'France — Mer de Glace (massif du Mont-Blanc)',
-    theme: 'glacier',
-    eras: GLACIER_ALPS_ERAS,
+    lat: 30.95,
+    lng: 30.48,
+    label: 'Égypte — pivots circulaires, désert occidental (nouvelles terres)',
+    theme: 'agriculture',
+    eras: AGRI_TIMELINE_ERAS,
   },
   {
-    lat: 46.443,
-    lng: 8.07,
-    label: 'Suisse — glacier d’Aletsch (Alpes bernoises)',
-    theme: 'glacier',
-    eras: GLACIER_ALPS_ERAS,
+    lat: 29.32,
+    lng: 30.78,
+    label: 'Égypte — dépression de Faiyoum (irrigation intensive)',
+    theme: 'agriculture',
+    eras: AGRI_TIMELINE_ERAS,
   },
   {
-    lat: 46.573,
-    lng: 8.391,
-    label: 'Suisse — glacier du Rhône (Furkapass)',
-    theme: 'glacier',
-    eras: GLACIER_ALPS_ERAS,
+    lat: 20.5,
+    lng: 44.68,
+    label: 'Arabie saoudite — Wadi ad-Dawasir (pivots dans le désert)',
+    theme: 'agriculture',
+    eras: AGRI_TIMELINE_ERAS,
   },
   {
-    lat: 46.409,
-    lng: 9.931,
-    label: 'Suisse — glacier de Morteratsch (Engadine)',
-    theme: 'glacier',
-    eras: GLACIER_ALPS_ERAS,
+    lat: 23.62,
+    lng: 53.72,
+    label: 'Émirats — Liwa / ouest d’Abou Dhabi (oasis & pivots)',
+    theme: 'agriculture',
+    eras: AGRI_TIMELINE_ERAS,
   },
   {
-    lat: 47.08,
-    lng: 12.73,
-    label: 'Autriche — glacier de la Pasterze (Glockner)',
-    theme: 'glacier',
-    eras: GLACIER_ALPS_ERAS,
-  },
-];
-
-/**
- * Installations aériennes US (zone MO / périphérie) : pistes et aires de stationnement vues du ciel.
- * Coordonnées centrées sur le complexe piste / trafic (zoom jeu ~13).
- */
-export const TIMELINE_US_BASES_ME = [
-  {
-    lat: 25.1217,
-    lng: 51.3139,
-    label: 'Qatar — Al-Udeid (pistes & aires de trafic)',
-    theme: 'us_bases_me',
-    eras: US_BASE_ME_ERAS,
+    lat: 32.15,
+    lng: 35.58,
+    label: 'Jordanie — vallée du Jourdain (maraîchage & parcelles irriguées)',
+    theme: 'agriculture',
+    eras: AGRI_TIMELINE_ERAS,
   },
   {
-    lat: 24.2483,
-    lng: 54.5478,
-    label: 'Émirats — Al-Dhafra (zone aviation militaire)',
-    theme: 'us_bases_me',
-    eras: US_BASE_ME_ERAS,
+    lat: -12.98,
+    lng: -55.42,
+    label: 'Brésil — Mato Grosso (soja, pivots & grilles)',
+    theme: 'agriculture',
+    eras: AGRI_TIMELINE_ERAS,
   },
   {
-    lat: 24.062,
-    lng: 45.621,
-    label: 'Arabie saoudite — Prince Sultan (Al-Kharj)',
-    theme: 'us_bases_me',
-    eras: US_BASE_ME_ERAS,
+    lat: -17.72,
+    lng: -63.08,
+    label: 'Bolivie — Santa Cruz (expansion agricole irriguée)',
+    theme: 'agriculture',
+    eras: AGRI_TIMELINE_ERAS,
   },
   {
-    lat: 29.3467,
-    lng: 47.5208,
-    label: 'Koweït — Ali Al Salem (zone piste)',
-    theme: 'us_bases_me',
-    eras: US_BASE_ME_ERAS,
-  },
-  {
-    lat: 37.002,
-    lng: 35.426,
-    label: 'Turquie — Incirlik (Adana), hub OTAN / US',
-    theme: 'us_bases_me',
-    eras: US_BASE_ME_ERAS,
+    lat: 16.47,
+    lng: -15.52,
+    label: 'Sénégal — vallée du fleuve Sénégal (Richard Toll, périmètres)',
+    theme: 'agriculture',
+    eras: AGRI_TIMELINE_ERAS,
   },
 ];
 
@@ -130,24 +100,21 @@ const POOLS = {
   all: () => [
     ...TIMELINE_URBAN,
     ...TIMELINE_DEFORESTATION,
-    ...TIMELINE_GLACIER,
-    ...TIMELINE_US_BASES_ME,
+    ...TIMELINE_AGRICULTURE,
   ],
   urban: () => [...TIMELINE_URBAN],
   deforestation: () => [...TIMELINE_DEFORESTATION],
-  glacier: () => [...TIMELINE_GLACIER],
-  us_bases_me: () => [...TIMELINE_US_BASES_ME],
+  agriculture: () => [...TIMELINE_AGRICULTURE],
 };
 
 /**
- * @param {'all'|'urban'|'deforestation'|'glacier'|'us_bases_me'} theme — anciens thèmes (feux, sécheresse, barrages) → pool « tout »
+ * @param {'all'|'urban'|'deforestation'|'agriculture'} theme — anciens thèmes → pool « tout »
  */
 export function getTimelinePool(theme) {
   const t =
     theme === 'urban' ||
     theme === 'deforestation' ||
-    theme === 'glacier' ||
-    theme === 'us_bases_me'
+    theme === 'agriculture'
       ? theme
       : 'all';
   return POOLS[t]();
