@@ -3,6 +3,7 @@
  * Chaque lieu peut définir `eras` (ordre des boutons). Défaut : Actuel → 2020 → 2014.
  * Feux : avant / pendant / après. Sécheresse : clichés 2018+ (IDs = waybackconfig Esri).
  * Glaciers / Alpes : été (peu de neige basse altitude) → hiver (enneigement) → actuel.
+ * Barrages : niveau d’eau bas (2022) vs haut (2024) vs actuel.
  */
 
 export const DEFAULT_TIMELINE_ERAS = [
@@ -28,6 +29,13 @@ const DROUGHT_EU_ERAS = [
 const DROUGHT_MA_ERAS = [
   { key: 'dry23', label: 'Sécheresse', sub: 'août 2023', releaseNum: 64776 },
   { key: 'wet24', label: 'Pluies', sub: 'juin 2024', releaseNum: 39767 },
+  { key: 'live', label: 'Actuel', sub: "aujourd'hui", releaseNum: null },
+];
+
+/** Barrages & lacs de retenue : niveau bas (sécheresse 2022) vs plus haut (2024) — mêmes releases que sécheresse EU. */
+const DAM_LEVEL_ERAS = [
+  { key: 'low', label: 'Bas', sub: 'août 2022', releaseNum: 45441 },
+  { key: 'high', label: 'Haut', sub: 'juin 2024', releaseNum: 39767 },
   { key: 'live', label: 'Actuel', sub: "aujourd'hui", releaseNum: null },
 ];
 
@@ -168,6 +176,47 @@ export const TIMELINE_GLACIER = [
   },
 ];
 
+/**
+ * Barrages : contraste niveau d’eau historiquement bas vs plus haut (Wayback).
+ */
+export const TIMELINE_DAM = [
+  {
+    lat: 36.12,
+    lng: -114.44,
+    label: 'États-Unis — lac Mead (barrage Hoover), Colorado très bas puis remontée',
+    theme: 'dam',
+    eras: DAM_LEVEL_ERAS,
+  },
+  {
+    lat: 37.05,
+    lng: -111.25,
+    label: 'États-Unis — lac Powell (Glen Canyon), même dynamique Colorado',
+    theme: 'dam',
+    eras: DAM_LEVEL_ERAS,
+  },
+  {
+    lat: 44.527,
+    lng: 6.326,
+    label: 'France — lac de Serre-Ponçon (barrage), surface d’eau selon les années',
+    theme: 'dam',
+    eras: DAM_LEVEL_ERAS,
+  },
+  {
+    lat: 43.78,
+    lng: 6.38,
+    label: 'France — lac de Sainte-Croix (Verdon)',
+    theme: 'dam',
+    eras: DAM_LEVEL_ERAS,
+  },
+  {
+    lat: 46.084,
+    lng: 7.404,
+    label: 'Suisse — lac des Dix (Grande Dixence)',
+    theme: 'dam',
+    eras: DAM_LEVEL_ERAS,
+  },
+];
+
 const POOLS = {
   all: () => [
     ...TIMELINE_URBAN,
@@ -175,16 +224,18 @@ const POOLS = {
     ...TIMELINE_WILDFIRE,
     ...TIMELINE_DROUGHT,
     ...TIMELINE_GLACIER,
+    ...TIMELINE_DAM,
   ],
   urban: () => [...TIMELINE_URBAN],
   deforestation: () => [...TIMELINE_DEFORESTATION],
   wildfire: () => [...TIMELINE_WILDFIRE],
   drought: () => [...TIMELINE_DROUGHT],
   glacier: () => [...TIMELINE_GLACIER],
+  dam: () => [...TIMELINE_DAM],
 };
 
 /**
- * @param {'all'|'urban'|'deforestation'|'wildfire'|'drought'|'glacier'} theme
+ * @param {'all'|'urban'|'deforestation'|'wildfire'|'drought'|'glacier'|'dam'} theme
  */
 export function getTimelinePool(theme) {
   const t =
@@ -192,7 +243,8 @@ export function getTimelinePool(theme) {
     theme === 'deforestation' ||
     theme === 'wildfire' ||
     theme === 'drought' ||
-    theme === 'glacier'
+    theme === 'glacier' ||
+    theme === 'dam'
       ? theme
       : 'all';
   return POOLS[t]();

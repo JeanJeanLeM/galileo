@@ -10,7 +10,7 @@ Jeu de géolocalisation par satellite. Une vue satellite s'affiche — à toi de
 | **Capitales** | 145 capitales à identifier parmi des pins sur la carte |
 | **Villes de France** | 10 grandes métropoles françaises |
 | **Villes d'Europe** | 10 villes emblématiques du continent |
-| **Chronologie** | Sous-thèmes : tout (23), urbanisation (8), feux (3), déforestation (2), sécheresse (5), **glaciers / neige** (5). Glaciers : Wayback **août 2023** (été) → **déc. 2023** (hiver) → actuel. Multiplicateur = **zoom** uniquement. |
+| **Chronologie** | Sous-thèmes : tout (28), + **barrages** (5) : niveau **bas** (août 2022) → **haut** (juin 2024) → actuel. Glaciers : août 2023 → déc. 2023 → actuel. Multiplicateur = **zoom** uniquement. |
 
 ## Mécanique de score
 
