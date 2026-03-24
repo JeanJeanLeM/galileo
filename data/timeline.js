@@ -2,45 +2,13 @@
  * Mode « multi-années » : même lieu, imagerie satellite à différentes dates.
  * Tuiles : Esri World Imagery (live) + World Imagery Wayback (IDs = releases officielles,
  * voir https://s3-us-west-2.amazonaws.com/config.maptiles.arcgis.com/waybackconfig.json).
- * L’archive Wayback remonte à ~2014 (~11 ans avant les clichés les plus récents du jeu).
+ * Le multiplicateur de score est géré uniquement par le zoom (comme les autres modes), pas par l’époque.
  */
 
 export const TIMELINE_ERAS = [
-  {
-    key: 'live',
-    label: 'Actuel',
-    sub: 'live Esri',
-    releaseNum: null,
-    mult: 5,
-  },
-  {
-    key: '2024',
-    label: '2024',
-    sub: 'juin',
-    releaseNum: 39767,
-    mult: 4,
-  },
-  {
-    key: '2020',
-    label: '2020',
-    sub: 'déc.',
-    releaseNum: 29260,
-    mult: 3,
-  },
-  {
-    key: '2018',
-    label: '2018',
-    sub: 'nov.',
-    releaseNum: 239,
-    mult: 2,
-  },
-  {
-    key: '2014',
-    label: '2014',
-    sub: 'fév.',
-    releaseNum: 10,
-    mult: 1,
-  },
+  { key: 'live', label: 'Actuel', sub: 'live Esri', releaseNum: null },
+  { key: '2020', label: '2020', sub: 'déc.', releaseNum: 29260 },
+  { key: '2014', label: '2014', sub: 'fév.', releaseNum: 10 },
 ];
 
 /** Lieux à fort contraste 2014 → aujourd’hui (urbanisation, déforestation, reclamation, etc.) */

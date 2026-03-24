@@ -121,7 +121,7 @@ function beginRound() {
   guess = null; gMarker = null;
   target    = pickLoc();
   roundZoom = 13;
-  roundMult = gameMode === 'timeline' ? TIMELINE_ERAS[0].mult : multForZoom(13);
+  roundMult = multForZoom(13);
   timelineEraIndex = 0;
 
   // Header
@@ -136,7 +136,7 @@ function beginRound() {
     'Placez votre pin';
   document.getElementById('sat-badge').textContent =
     gameMode === 'timeline'
-      ? 'Chronologie : choisissez l’époque (↓)'
+      ? 'Chronologie : époque puis zoom — le × vient du zoom seulement'
       : 'Vue satellite';
   document.getElementById('confirm-btn').classList.remove('on');
 
@@ -219,17 +219,15 @@ function beginRound() {
     });
   }
 
-  const zoomSw = document.getElementById('zoom-sw');
-  const eraSw  = document.getElementById('era-sw');
+  const eraSw = document.getElementById('era-sw');
   if (gameMode === 'timeline') {
-    zoomSw.style.display = 'none';
-    eraSw.style.display  = 'flex';
+    eraSw.hidden = false;
     buildEraSw();
   } else {
-    eraSw.style.display  = 'none';
-    zoomSw.style.display = 'flex';
-    buildZoomSw();
+    eraSw.hidden = true;
+    eraSw.innerHTML = '';
   }
+  buildZoomSw();
 }
 
 /* ════════════════════════════════════════════════
@@ -243,7 +241,7 @@ function buildEraSw() {
     btn.type = 'button';
     btn.className = 'esw';
     btn.dataset.idx = String(idx);
-    btn.innerHTML = `<span class="esw-mult">×${era.mult}</span><span class="esw-lbl">${era.label}</span><span class="esw-sub">${era.sub}</span>`;
+    btn.innerHTML = `<span class="esw-lbl">${era.label}</span><span class="esw-sub">${era.sub}</span>`;
     btn.addEventListener('click', () => switchEra(idx));
     sw.appendChild(btn);
   });
@@ -253,17 +251,13 @@ function buildEraSw() {
 function refreshEraSw() {
   document.querySelectorAll('.esw').forEach(btn => {
     const idx = +btn.dataset.idx;
-    const m   = TIMELINE_ERAS[idx].mult;
-    btn.classList.toggle('active',  idx === timelineEraIndex);
-    btn.classList.toggle('costly', m < roundMult);
+    btn.classList.toggle('active', idx === timelineEraIndex);
   });
 }
 
 function switchEra(idx) {
   if (gameMode !== 'timeline' || !satMap) return;
   const era = TIMELINE_ERAS[idx];
-  const prevMult = roundMult;
-  roundMult = Math.min(roundMult, era.mult);
   timelineEraIndex = idx;
 
   satMap.removeLayer(satBaseLayer);
@@ -272,16 +266,6 @@ function switchEra(idx) {
       ? L.tileLayer(ESRI_WORLD_LIVE, { maxZoom: 19 })
       : L.tileLayer(waybackTileUrl(era.releaseNum), { maxZoom: 19 });
   satBaseLayer.addTo(satMap);
-
-  if (roundMult < prevMult) {
-    const tag = document.getElementById('mult-tag');
-    tag.textContent = `×${roundMult}`;
-    tag.classList.remove('drop');
-    void tag.offsetWidth;
-    tag.classList.add('drop');
-  } else {
-    document.getElementById('mult-tag').textContent = `×${roundMult}`;
-  }
 
   refreshEraSw();
 }
@@ -310,7 +294,6 @@ function refreshZoomSw() {
 }
 
 function switchZoom(z) {
-  if (gameMode === 'timeline') return;
   const newMult   = multForZoom(z);
   const decreased = newMult < roundMult;
   roundZoom = z;

@@ -543,10 +543,23 @@ body.game-page {
   z-index: 500; pointer-events: none; backdrop-filter: blur(6px);
 }
 
+/* ── Satellite controls stack (époque + zoom) ── */
+.sat-stack {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100% - 20px);
+}
+
 /* ── Zoom switcher ── */
 #zoom-sw {
-  position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%);
-  z-index: 500; display: flex; gap: 5px;
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 5px;
   background: rgba(7,9,15,0.84); border: 1px solid var(--border);
   border-radius: 10px; padding: 5px; backdrop-filter: blur(10px);
 }
@@ -571,14 +584,17 @@ body.game-page {
 .zsw.costly .zsw-km  { color: rgba(244,112,112,0.55); }
 .zsw.costly:hover    { border-color: rgba(244,112,112,0.35); }
 
-/* ── Timeline era switcher (mode chronologie) ── */
+/* ── Timeline era switcher (mode chronologie, sans impact multiplicateur) ── */
 #era-sw {
   display: none;
-  position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%);
-  z-index: 500; flex-wrap: wrap; justify-content: center; max-width: calc(100% - 24px);
+  flex-wrap: wrap; justify-content: center;
   gap: 4px;
   background: rgba(7,9,15,0.84); border: 1px solid var(--border);
   border-radius: 10px; padding: 5px; backdrop-filter: blur(10px);
+}
+
+#era-sw:not([hidden]) {
+  display: flex;
 }
 
 .esw {
@@ -589,17 +605,12 @@ body.game-page {
   transition: all 0.15s; gap: 1px; min-width: 52px;
 }
 
-.esw-mult { font-size: 13px; font-weight: 700; color: var(--accent); line-height: 1; }
-.esw-lbl  { font-size: 11px; font-weight: 600; color: var(--text); line-height: 1.1; }
+.esw-lbl  { font-size: 12px; font-weight: 600; color: var(--text); line-height: 1.1; }
 .esw-sub  { font-size: 9px; color: var(--text3); letter-spacing: 0.3px; }
 
 .esw:hover          { background: var(--surf2); border-color: var(--border); }
 .esw:hover .esw-sub { color: var(--text2); }
 .esw.active         { background: var(--surf3); border-color: var(--accent); }
-.esw.costly         { opacity: 0.80; }
-.esw.costly .esw-mult{ color: var(--red); }
-.esw.costly .esw-sub { color: rgba(244,112,112,0.55); }
-.esw.costly:hover   { border-color: rgba(244,112,112,0.35); }
 
 /* ── Hint button ── */
 #hint-btn {
