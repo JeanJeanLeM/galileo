@@ -46,14 +46,14 @@
           <span class="info-btn">i
             <span class="info-tooltip">
               Chaque partie = <strong>5 manches</strong>.<br>
-              Démarrez à <strong>~10 km (×5)</strong>.<br>
-              Pendant une manche, zoomez librement — mais le multiplicateur ne <strong>remonte jamais</strong>.<br>
+              Démarrez à <strong>~10 km (×5)</strong> (ou époque la plus récente en mode Chronologie).<br>
+              Zoom ou <strong>vues plus anciennes</strong> : le multiplicateur ne <strong>remonte jamais</strong>.<br>
               Max : <strong>5 000 pts</strong> par manche.
             </span>
           </span>
         </div>
 
-        <div class="modes-grid" id="modes-grid">
+        <div class="modes-grid modes-grid--5" id="modes-grid">
 
           <button class="mode-card sel" data-mode="world" onclick="selectMode(this,'world')">
             <div class="mc-tag">Classique</div>
@@ -81,6 +81,13 @@
             <div class="mc-name">Villes d'Europe</div>
             <div class="mc-desc">10 villes emblématiques du continent européen.</div>
             <div class="mc-count">10 villes · Continent</div>
+          </button>
+
+          <button class="mode-card" data-mode="timeline" onclick="selectMode(this,'timeline')">
+            <div class="mc-tag">Temps</div>
+            <div class="mc-name">Chronologie</div>
+            <div class="mc-desc">10 lieux à fort contraste : même point, imagerie Esri 2014 → aujourd’hui (Wayback + live).</div>
+            <div class="mc-count">10 lieux · 5 époques</div>
           </button>
 
         </div>

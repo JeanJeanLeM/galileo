@@ -3,6 +3,14 @@ import { LOCS }          from '../data/world.js';
 import { CAPITALS }      from '../data/capitals.js';
 import { FRANCE_CITIES } from '../data/france.js';
 import { EUROPE_CITIES } from '../data/europe.js';
+import { TIMELINE_ERAS, TIMELINE_LOCS } from '../data/timeline.js';
+
+const ESRI_WORLD_LIVE =
+  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+
+function waybackTileUrl(releaseNum) {
+  return `https://wayback.maptiles.arcgis.com/arcgis/rest/services/World_Imagery/WMTS/1.0.0/default028mm/MapServer/tile/${releaseNum}/{z}/{y}/{x}`;
+}
 
 /* ════════════════════════════════════════════════
    ZOOM STEPS
@@ -49,6 +57,8 @@ let hintMarkers = [];
 let satMap   = null;
 let guessMap = null;
 let rrMap    = null;
+let satBaseLayer     = null;
+let timelineEraIndex = 0;
 
 /* ════════════════════════════════════════════════
    INIT
@@ -91,6 +101,7 @@ function pickLoc() {
     gameMode === 'capitals' ? CAPITALS      :
     gameMode === 'france'   ? FRANCE_CITIES :
     gameMode === 'europe'   ? EUROPE_CITIES :
+    gameMode === 'timeline' ? TIMELINE_LOCS :
     LOCS;
   let i;
   do { i = Math.floor(Math.random() * pool.length); } while (usedIdx.includes(i));
@@ -110,7 +121,8 @@ function beginRound() {
   guess = null; gMarker = null;
   target    = pickLoc();
   roundZoom = 13;
-  roundMult = multForZoom(13);
+  roundMult = gameMode === 'timeline' ? TIMELINE_ERAS[0].mult : multForZoom(13);
+  timelineEraIndex = 0;
 
   // Header
   document.getElementById('round-lbl').textContent  = `Manche ${round} / 5`;
@@ -120,7 +132,12 @@ function beginRound() {
   document.getElementById('guess-badge').textContent =
     gameMode === 'capitals' ? 'Identifiez la capitale' :
     (gameMode === 'france' || gameMode === 'europe') ? 'Trouvez la ville' :
+    gameMode === 'timeline' ? 'Même lieu à toutes les dates — placez votre pin' :
     'Placez votre pin';
+  document.getElementById('sat-badge').textContent =
+    gameMode === 'timeline'
+      ? 'Chronologie : choisissez l’époque (↓)'
+      : 'Vue satellite';
   document.getElementById('confirm-btn').classList.remove('on');
 
   // Round dots
@@ -150,6 +167,7 @@ function beginRound() {
   // Destroy old maps
   satMap   = kill(satMap);
   guessMap = kill(guessMap);
+  satBaseLayer = null;
 
   // Satellite view (locked)
   satMap = L.map('sat-map', {
@@ -159,20 +177,26 @@ function beginRound() {
     dragging: false, touchZoom: false, doubleClickZoom: false,
     scrollWheelZoom: false, boxZoom: false, keyboard: false,
   });
-  L.tileLayer(
-    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    { maxZoom: 19 }
-  ).addTo(satMap);
+  const era0 = TIMELINE_ERAS[0];
+  satBaseLayer =
+    gameMode === 'timeline'
+      ? (era0.releaseNum == null
+          ? L.tileLayer(ESRI_WORLD_LIVE, { maxZoom: 19 })
+          : L.tileLayer(waybackTileUrl(era0.releaseNum), { maxZoom: 19 }))
+      : L.tileLayer(ESRI_WORLD_LIVE, { maxZoom: 19 });
+  satBaseLayer.addTo(satMap);
   setTimeout(() => satMap.invalidateSize(), 0);
 
   // Guess map
   const guessCenter =
-    gameMode === 'france'  ? [46.5,  2.5] :
-    gameMode === 'europe'  ? [50.0, 10.0] :
+    gameMode === 'france'   ? [46.5,  2.5] :
+    gameMode === 'europe'   ? [50.0, 10.0] :
+    gameMode === 'timeline' ? [20, 0] :
     [20, 0];
   const guessZoom =
-    gameMode === 'france'  ? 5 :
-    gameMode === 'europe'  ? 4 :
+    gameMode === 'france'   ? 5 :
+    gameMode === 'europe'   ? 4 :
+    gameMode === 'timeline' ? 2 :
     2;
 
   guessMap = L.map('guess-map', {
@@ -195,12 +219,73 @@ function beginRound() {
     });
   }
 
-  buildZoomSw();
+  const zoomSw = document.getElementById('zoom-sw');
+  const eraSw  = document.getElementById('era-sw');
+  if (gameMode === 'timeline') {
+    zoomSw.style.display = 'none';
+    eraSw.style.display  = 'flex';
+    buildEraSw();
+  } else {
+    eraSw.style.display  = 'none';
+    zoomSw.style.display = 'flex';
+    buildZoomSw();
+  }
 }
 
 /* ════════════════════════════════════════════════
    ZOOM SWITCHER
 ════════════════════════════════════════════════ */
+function buildEraSw() {
+  const sw = document.getElementById('era-sw');
+  sw.innerHTML = '';
+  TIMELINE_ERAS.forEach((era, idx) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'esw';
+    btn.dataset.idx = String(idx);
+    btn.innerHTML = `<span class="esw-mult">×${era.mult}</span><span class="esw-lbl">${era.label}</span><span class="esw-sub">${era.sub}</span>`;
+    btn.addEventListener('click', () => switchEra(idx));
+    sw.appendChild(btn);
+  });
+  refreshEraSw();
+}
+
+function refreshEraSw() {
+  document.querySelectorAll('.esw').forEach(btn => {
+    const idx = +btn.dataset.idx;
+    const m   = TIMELINE_ERAS[idx].mult;
+    btn.classList.toggle('active',  idx === timelineEraIndex);
+    btn.classList.toggle('costly', m < roundMult);
+  });
+}
+
+function switchEra(idx) {
+  if (gameMode !== 'timeline' || !satMap) return;
+  const era = TIMELINE_ERAS[idx];
+  const prevMult = roundMult;
+  roundMult = Math.min(roundMult, era.mult);
+  timelineEraIndex = idx;
+
+  satMap.removeLayer(satBaseLayer);
+  satBaseLayer =
+    era.releaseNum == null
+      ? L.tileLayer(ESRI_WORLD_LIVE, { maxZoom: 19 })
+      : L.tileLayer(waybackTileUrl(era.releaseNum), { maxZoom: 19 });
+  satBaseLayer.addTo(satMap);
+
+  if (roundMult < prevMult) {
+    const tag = document.getElementById('mult-tag');
+    tag.textContent = `×${roundMult}`;
+    tag.classList.remove('drop');
+    void tag.offsetWidth;
+    tag.classList.add('drop');
+  } else {
+    document.getElementById('mult-tag').textContent = `×${roundMult}`;
+  }
+
+  refreshEraSw();
+}
+
 function buildZoomSw() {
   const sw = document.getElementById('zoom-sw');
   sw.innerHTML = '';
@@ -225,6 +310,7 @@ function refreshZoomSw() {
 }
 
 function switchZoom(z) {
+  if (gameMode === 'timeline') return;
   const newMult   = multForZoom(z);
   const decreased = newMult < roundMult;
   roundZoom = z;
@@ -284,6 +370,7 @@ function showHint() {
     gameMode === 'capitals' ? CAPITALS      :
     gameMode === 'france'   ? FRANCE_CITIES :
     gameMode === 'europe'   ? EUROPE_CITIES :
+    gameMode === 'timeline' ? TIMELINE_LOCS :
     LOCS;
 
   const tooltipOpts = { permanent: false, direction: 'top', className: 'hint-tooltip', opacity: 1 };
@@ -399,6 +486,7 @@ function showResult() {
     gameMode === 'capitals' ? 'Mode Capitales'       :
     gameMode === 'france'   ? 'Mode Villes de France':
     gameMode === 'europe'   ? "Mode Villes d'Europe" :
+    gameMode === 'timeline' ? 'Mode Chronologie'   :
     'Mode Monde libre';
 
   const list = document.getElementById('rounds-list');

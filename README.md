@@ -10,12 +10,13 @@ Jeu de géolocalisation par satellite. Une vue satellite s'affiche — à toi de
 | **Capitales** | 145 capitales à identifier parmi des pins sur la carte |
 | **Villes de France** | 10 grandes métropoles françaises |
 | **Villes d'Europe** | 10 villes emblématiques du continent |
+| **Chronologie** | 10 lieux à fort changement visible ; même coordonnées, 5 époques d’imagerie (Esri Wayback ~2014 → live) |
 
 ## Mécanique de score
 
 - 5 manches par partie, max **5 000 pts** par manche (25 000 au total)
 - Démarrage à **×5** (~10 km de vue)
-- Changer d'échelle pendant une manche **réduit définitivement** le multiplicateur
+- Changer d'échelle (ou, en mode Chronologie, afficher une imagerie plus ancienne) **réduit définitivement** le multiplicateur
 - Formule : `score = 1 000 × mult × e^(−km / 2 000)`
 
 ## Structure
@@ -24,7 +25,7 @@ Jeu de géolocalisation par satellite. Une vue satellite s'affiche — à toi de
 ├── index.html        Landing page
 ├── game.html         Page de jeu
 ├── css/style.css     Styles
-├── data/             Données par mode (world, capitals, france, europe)
+├── data/             Données par mode (+ `timeline.js` : lieux + IDs releases Wayback Esri)
 └── js/               Logique de jeu (game.js, scoring.js)
 ```
 
