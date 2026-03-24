@@ -4,6 +4,7 @@ import { CAPITALS }      from '../data/capitals.js';
 import { FRANCE_CITIES } from '../data/france.js';
 import { EUROPE_CITIES } from '../data/europe.js';
 import { TIMELINE_ERAS, TIMELINE_LOCS } from '../data/timeline.js';
+import { scheduleTimelineTilePreload } from './timelinePreload.js';
 
 const ESRI_WORLD_LIVE =
   'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
@@ -186,6 +187,10 @@ function beginRound() {
       : L.tileLayer(ESRI_WORLD_LIVE, { maxZoom: 19 });
   satBaseLayer.addTo(satMap);
   setTimeout(() => satMap.invalidateSize(), 0);
+
+  if (gameMode === 'timeline') {
+    scheduleTimelineTilePreload(target.lat, target.lng, usedIdx);
+  }
 
   // Guess map
   const guessCenter =
