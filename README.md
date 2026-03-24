@@ -10,7 +10,7 @@ Jeu de géolocalisation par satellite. Une vue satellite s'affiche — à toi de
 | **Capitales** | 145 capitales à identifier parmi des pins sur la carte |
 | **Villes de France** | 10 grandes métropoles françaises |
 | **Villes d'Europe** | 10 villes emblématiques du continent |
-| **Chronologie** | 10 lieux à fort changement visible ; 3 époques (2014, 2020, actuel). Le multiplicateur suit le **zoom** comme ailleurs. |
+| **Chronologie** | Sous-thèmes : tout (13), urbanisation (8), feux (3), déforestation (2). Feux : avant / pendant (2020 Wayback) / après quand dispo ; Canada 2023 sans « pendant ». Multiplicateur = **zoom** uniquement. |
 
 ## Mécanique de score
 
@@ -25,7 +25,7 @@ Jeu de géolocalisation par satellite. Une vue satellite s'affiche — à toi de
 ├── index.html        Landing page
 ├── game.html         Page de jeu
 ├── css/style.css     Styles
-├── data/             Données par mode (+ `timeline.js` : lieux + IDs releases Wayback Esri)
+├── data/             Données par mode (+ `timeline.js` : thèmes, lieux, `eras` Wayback)
 └── js/               Logique de jeu (game.js, scoring.js)
 ```
 

@@ -3,7 +3,7 @@ import { LOCS }          from '../data/world.js';
 import { CAPITALS }      from '../data/capitals.js';
 import { FRANCE_CITIES } from '../data/france.js';
 import { EUROPE_CITIES } from '../data/europe.js';
-import { TIMELINE_ERAS, TIMELINE_LOCS } from '../data/timeline.js';
+import { DEFAULT_TIMELINE_ERAS, getTimelinePool } from '../data/timeline.js';
 import { scheduleTimelineTilePreload } from './timelinePreload.js';
 
 const ESRI_WORLD_LIVE =
@@ -32,6 +32,8 @@ function multForZoom(z) {
    STATE
 ════════════════════════════════════════════════ */
 let gameMode = 'world';
+/** Thème chronologie : all | urban | wildfire | deforestation */
+let timelineTheme = 'all';
 
 let round      = 0;
 let totalScore = 0;
@@ -60,12 +62,16 @@ let guessMap = null;
 let rrMap    = null;
 let satBaseLayer     = null;
 let timelineEraIndex = 0;
+/** Époques affichées pour la manche en cours (varie selon le lieu) */
+let activeTimelineEras = DEFAULT_TIMELINE_ERAS;
 
 /* ════════════════════════════════════════════════
    INIT
 ════════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
-  gameMode = new URLSearchParams(window.location.search).get('mode') || 'world';
+  const params = new URLSearchParams(window.location.search);
+  gameMode = params.get('mode') || 'world';
+  timelineTheme = params.get('theme') || 'all';
 
   document.getElementById('confirm-btn').addEventListener('click', confirmGuess);
   document.getElementById('hint-btn').addEventListener('click', showHint);
@@ -102,7 +108,7 @@ function pickLoc() {
     gameMode === 'capitals' ? CAPITALS      :
     gameMode === 'france'   ? FRANCE_CITIES :
     gameMode === 'europe'   ? EUROPE_CITIES :
-    gameMode === 'timeline' ? TIMELINE_LOCS :
+    gameMode === 'timeline' ? getTimelinePool(timelineTheme) :
     LOCS;
   let i;
   do { i = Math.floor(Math.random() * pool.length); } while (usedIdx.includes(i));
@@ -123,7 +129,17 @@ function beginRound() {
   target    = pickLoc();
   roundZoom = 13;
   roundMult = multForZoom(13);
-  timelineEraIndex = 0;
+
+  if (gameMode === 'timeline') {
+    activeTimelineEras = target.eras || DEFAULT_TIMELINE_ERAS;
+    timelineEraIndex =
+      target.theme === 'wildfire'
+        ? activeTimelineEras.length - 1
+        : 0;
+  } else {
+    activeTimelineEras = DEFAULT_TIMELINE_ERAS;
+    timelineEraIndex = 0;
+  }
 
   // Header
   document.getElementById('round-lbl').textContent  = `Manche ${round} / 5`;
@@ -178,18 +194,19 @@ function beginRound() {
     dragging: false, touchZoom: false, doubleClickZoom: false,
     scrollWheelZoom: false, boxZoom: false, keyboard: false,
   });
-  const era0 = TIMELINE_ERAS[0];
+  const eraStart =
+    gameMode === 'timeline' ? activeTimelineEras[timelineEraIndex] : null;
   satBaseLayer =
     gameMode === 'timeline'
-      ? (era0.releaseNum == null
+      ? (eraStart.releaseNum == null
           ? L.tileLayer(ESRI_WORLD_LIVE, { maxZoom: 19 })
-          : L.tileLayer(waybackTileUrl(era0.releaseNum), { maxZoom: 19 }))
+          : L.tileLayer(waybackTileUrl(eraStart.releaseNum), { maxZoom: 19 }))
       : L.tileLayer(ESRI_WORLD_LIVE, { maxZoom: 19 });
   satBaseLayer.addTo(satMap);
   setTimeout(() => satMap.invalidateSize(), 0);
 
   if (gameMode === 'timeline') {
-    scheduleTimelineTilePreload(target.lat, target.lng, usedIdx);
+    scheduleTimelineTilePreload(target, usedIdx, timelineTheme);
   }
 
   // Guess map
@@ -241,7 +258,7 @@ function beginRound() {
 function buildEraSw() {
   const sw = document.getElementById('era-sw');
   sw.innerHTML = '';
-  TIMELINE_ERAS.forEach((era, idx) => {
+  activeTimelineEras.forEach((era, idx) => {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'esw';
@@ -262,7 +279,8 @@ function refreshEraSw() {
 
 function switchEra(idx) {
   if (gameMode !== 'timeline' || !satMap) return;
-  const era = TIMELINE_ERAS[idx];
+  if (idx < 0 || idx >= activeTimelineEras.length) return;
+  const era = activeTimelineEras[idx];
   timelineEraIndex = idx;
 
   satMap.removeLayer(satBaseLayer);
@@ -358,7 +376,7 @@ function showHint() {
     gameMode === 'capitals' ? CAPITALS      :
     gameMode === 'france'   ? FRANCE_CITIES :
     gameMode === 'europe'   ? EUROPE_CITIES :
-    gameMode === 'timeline' ? TIMELINE_LOCS :
+    gameMode === 'timeline' ? getTimelinePool(timelineTheme) :
     LOCS;
 
   const tooltipOpts = { permanent: false, direction: 'top', className: 'hint-tooltip', opacity: 1 };
@@ -474,8 +492,15 @@ function showResult() {
     gameMode === 'capitals' ? 'Mode Capitales'       :
     gameMode === 'france'   ? 'Mode Villes de France':
     gameMode === 'europe'   ? "Mode Villes d'Europe" :
-    gameMode === 'timeline' ? 'Mode Chronologie'   :
-    'Mode Monde libre';
+    gameMode === 'timeline'
+      ? (timelineTheme === 'urban'
+          ? 'Chronologie — urbanisation'
+          : timelineTheme === 'wildfire'
+            ? 'Chronologie — feux de forêt'
+            : timelineTheme === 'deforestation'
+              ? 'Chronologie — déforestation'
+              : 'Chronologie — tous thèmes')
+      : 'Mode Monde libre';
 
   const list = document.getElementById('rounds-list');
   list.innerHTML = '';

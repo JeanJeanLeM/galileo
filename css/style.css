@@ -257,11 +257,8 @@ body {
   max-width: 680px;
 }
 
-.modes-grid--5 .mode-card:last-child {
-  grid-column: 1 / -1;
-  justify-self: center;
-  max-width: 360px;
-  width: 100%;
+.modes-grid--many {
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
 }
 
 /* ── Mode card ── */

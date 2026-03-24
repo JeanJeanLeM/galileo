@@ -1,4 +1,4 @@
-import { TIMELINE_ERAS, TIMELINE_LOCS } from '../data/timeline.js';
+import { DEFAULT_TIMELINE_ERAS, getTimelinePool } from '../data/timeline.js';
 
 const Z_LEVELS = [13, 11, 10, 9, 8];
 
@@ -23,11 +23,12 @@ function tileUrlWayback(releaseNum, z, y, x) {
   return `https://wayback.maptiles.arcgis.com/arcgis/rest/services/World_Imagery/WMTS/1.0.0/default028mm/MapServer/tile/${releaseNum}/${z}/${y}/${x}`;
 }
 
-function collectUrls(lat, lng) {
+function collectUrls(lat, lng, eras) {
   const urls = [];
   const ring = 1;
+  const list = eras || DEFAULT_TIMELINE_ERAS;
 
-  for (const era of TIMELINE_ERAS) {
+  for (const era of list) {
     for (const z of Z_LEVELS) {
       const { x: cx, y: cy } = latLngToTileXY(lat, lng, z);
       const n = 2 ** z;
@@ -49,18 +50,18 @@ function collectUrls(lat, lng) {
 }
 
 /**
- * Précharge en arrière-plan les tuiles pour la manche en cours (3 époques × 5 zooms × grille 3×3),
- * dans l’ordre : Actuel → 2020 → 2014.
- * Ensuite, les autres lieux du pool pas encore tirés cette partie (mêmes tuiles), pour lisser les manches suivantes.
- * Annulé automatiquement si une nouvelle manche démarre (preloadGeneration).
+ * Précharge les tuiles (toutes les époques du lieu × zooms × grille), puis le reste du pool chronologie.
  */
-export function scheduleTimelineTilePreload(lat, lng, usedIndices) {
+export function scheduleTimelineTilePreload(target, usedIndices, theme) {
   const gen = ++preloadGeneration;
+  const pool = getTimelinePool(theme);
+  const eras = target.eras || DEFAULT_TIMELINE_ERAS;
 
-  let urls = collectUrls(lat, lng);
-  TIMELINE_LOCS.forEach((loc, idx) => {
+  let urls = collectUrls(target.lat, target.lng, eras);
+  pool.forEach((loc, idx) => {
     if (usedIndices.includes(idx)) return;
-    urls = urls.concat(collectUrls(loc.lat, loc.lng));
+    const e = loc.eras || DEFAULT_TIMELINE_ERAS;
+    urls = urls.concat(collectUrls(loc.lat, loc.lng, e));
   });
 
   let i = 0;

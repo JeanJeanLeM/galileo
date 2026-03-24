@@ -53,7 +53,7 @@
           </span>
         </div>
 
-        <div class="modes-grid modes-grid--5" id="modes-grid">
+        <div class="modes-grid modes-grid--many" id="modes-grid">
 
           <button class="mode-card sel" data-mode="world" onclick="selectMode(this,'world')">
             <div class="mc-tag">Classique</div>
@@ -83,11 +83,32 @@
             <div class="mc-count">10 villes · Continent</div>
           </button>
 
-          <button class="mode-card" data-mode="timeline" onclick="selectMode(this,'timeline')">
+          <button class="mode-card" data-mode="timeline" data-timeline-theme="all" onclick="selectMode(this,'timeline')">
             <div class="mc-tag">Temps</div>
-            <div class="mc-name">Chronologie</div>
-            <div class="mc-desc">10 lieux à fort contraste : même point, imagerie Esri 2014 → aujourd’hui (Wayback + live).</div>
-            <div class="mc-count">10 lieux · 3 époques</div>
+            <div class="mc-name">Chronologie — tout</div>
+            <div class="mc-desc">Urbanisation, déforestation et feux : 13 lieux, époques selon le thème (Avant / Pendant / Après pour les feux).</div>
+            <div class="mc-count">13 lieux</div>
+          </button>
+
+          <button class="mode-card" data-mode="timeline" data-timeline-theme="urban" onclick="selectMode(this,'timeline')">
+            <div class="mc-tag">Temps</div>
+            <div class="mc-name">Urbanisation</div>
+            <div class="mc-desc">Métropoles et littoraux : Actuel, 2020, 2014.</div>
+            <div class="mc-count">8 lieux</div>
+          </button>
+
+          <button class="mode-card" data-mode="timeline" data-timeline-theme="wildfire" onclick="selectMode(this,'timeline')">
+            <div class="mc-tag">Temps</div>
+            <div class="mc-name">Feux de forêt</div>
+            <div class="mc-desc">Australie 2019-20, Canada 2023 (C.-B.), Russie Sakha 2021 — avant / pendant / après selon les clichés.</div>
+            <div class="mc-count">3 lieux</div>
+          </button>
+
+          <button class="mode-card" data-mode="timeline" data-timeline-theme="deforestation" onclick="selectMode(this,'timeline')">
+            <div class="mc-tag">Temps</div>
+            <div class="mc-name">Déforestation</div>
+            <div class="mc-desc">Bornéo et Amazonie : Actuel, 2020, 2014.</div>
+            <div class="mc-count">2 lieux</div>
           </button>
 
         </div>
@@ -136,15 +157,21 @@
     });
 
     let selectedMode = 'world';
+    let selectedTimelineTheme = 'all';
 
     function selectMode(el, mode) {
       document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('sel'));
       el.classList.add('sel');
       selectedMode = mode;
+      selectedTimelineTheme = el.dataset.timelineTheme || 'all';
     }
 
     function play() {
-      window.location.href = 'game.html?mode=' + selectedMode;
+      let url = 'game.html?mode=' + selectedMode;
+      if (selectedMode === 'timeline' && selectedTimelineTheme && selectedTimelineTheme !== 'all') {
+        url += '&theme=' + selectedTimelineTheme;
+      }
+      window.location.href = url;
     }
   </script>
 
