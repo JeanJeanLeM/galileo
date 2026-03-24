@@ -2,7 +2,7 @@
  * Mode Chronologie : lieux avec imagerie Esri live + Wayback.
  * Chaque lieu peut définir `eras` (ordre des boutons). Défaut : Actuel → 2020 → 2014.
  * Feux : avant / pendant / après. Sécheresse : clichés 2018+ (IDs = waybackconfig Esri).
- * Glaciers / Alpes : été (peu de neige basse altitude) → hiver (enneigement) → actuel.
+ * Glaciers / Alpes : été 2014 → été 2020 → actuel (fonte comparable, pas mélange été/hiver).
  * Barrages : niveau d’eau bas (2022) vs haut (2024) vs actuel.
  */
 
@@ -39,10 +39,13 @@ const DAM_LEVEL_ERAS = [
   { key: 'live', label: 'Actuel', sub: "aujourd'hui", releaseNum: null },
 ];
 
-/** Alpes : 64776 = août 2023 (fonte / moins de neige) ; 56102 = déc. 2023 (enneigement) */
+/**
+ * Glaciers : uniquement des clichés **estivaux** (même saison → contraste = fonte / glacier, pas neige hivernale).
+ * 5232 = Wayback 2014-07-30 · 6049 = Wayback 2020-08-12 (waybackconfig Esri).
+ */
 const GLACIER_ALPS_ERAS = [
-  { key: 'sum23', label: 'Été', sub: 'août 2023', releaseNum: 64776 },
-  { key: 'win23', label: 'Hiver', sub: 'déc. 2023', releaseNum: 56102 },
+  { key: 'y2014', label: '2014', sub: 'été (juil.)', releaseNum: 5232 },
+  { key: 'y2020', label: '2020', sub: 'été (août)', releaseNum: 6049 },
   { key: 'live', label: 'Actuel', sub: "aujourd'hui", releaseNum: null },
 ];
 

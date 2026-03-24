@@ -10,7 +10,7 @@ Jeu de géolocalisation par satellite. Une vue satellite s'affiche — à toi de
 | **Capitales** | 145 capitales à identifier parmi des pins sur la carte |
 | **Villes de France** | 10 grandes métropoles françaises |
 | **Villes d'Europe** | 10 villes emblématiques du continent |
-| **Chronologie** | Sous-thèmes : tout (28), + **barrages** (5) : niveau **bas** (août 2022) → **haut** (juin 2024) → actuel. Glaciers : août 2023 → déc. 2023 → actuel. Multiplicateur = **zoom** uniquement. |
+| **Chronologie** | Sous-thèmes : tout (28), + **barrages** (5) : bas (août 2022) → haut (juin 2024) → actuel. **Glaciers** : été **2014** → été **2020** → actuel (Wayback). Multiplicateur = **zoom** uniquement. |
 
 ## Mécanique de score
 
