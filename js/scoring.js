@@ -14,10 +14,10 @@ export function haversine(la1, lo1, la2, lo2) {
 }
 
 /**
- * Points earned for a given distance and active multiplier.
- * Formula: 1 000 × mult × e^(−km / 2 000)
- * Max: 5 000 pts (mult = 5, km = 0)
+ * Points earned for a given distance.
+ * Formula: 1 000 × e^(−km / 2 000)
+ * Max: 1 000 pts (km = 0)
  */
-export function scoreFor(km, mult) {
+export function scoreFor(km, mult = 1) {
   return Math.round(1000 * mult * Math.exp(-km / 2000));
 }

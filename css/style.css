@@ -249,6 +249,14 @@ body {
   color: var(--text3);
 }
 
+.lp-modes-desc {
+  max-width: 480px;
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text2);
+}
+
 .modes-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -343,6 +351,7 @@ body {
 
 /* ── Play button ── */
 .btn-play {
+  display: inline-block;
   padding: 16px 72px;
   background: var(--accent);
   color: #000;
@@ -352,6 +361,7 @@ body {
   font-weight: 700;
   letter-spacing: 3px;
   text-transform: uppercase;
+  text-decoration: none;
   cursor: pointer;
   font-family: inherit;
   transition: all 0.2s;

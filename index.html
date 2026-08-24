@@ -42,78 +42,21 @@
 
       <section class="lp-modes">
         <div style="display:flex; align-items:center; gap:10px;">
-          <p class="lp-modes-label">Choisissez un mode</p>
+          <p class="lp-modes-label">Prêt à jouer</p>
           <span class="info-btn">i
             <span class="info-tooltip">
               Chaque partie = <strong>5 manches</strong>.<br>
-              Démarrez à <strong>~10 km (×5)</strong>.<br>
-              Zoom arrière : le multiplicateur ne <strong>remonte jamais</strong> (en Chronologie, changer d’époque ne change pas le ×).<br>
-              Max : <strong>5 000 pts</strong> par manche.
+              Vue satellite fixe à <strong>~1 000 km</strong>.<br>
+              Max : <strong>1 000 pts</strong> par manche.
             </span>
           </span>
         </div>
 
-        <div class="modes-grid modes-grid--many" id="modes-grid">
+        <p class="lp-modes-desc">
+          Lieux du monde entier mélangés — paysages, capitales, villes et sites emblématiques.
+        </p>
 
-          <button class="mode-card sel" data-mode="world" onclick="selectMode(this,'world')">
-            <div class="mc-tag">Classique</div>
-            <div class="mc-name">Monde libre</div>
-            <div class="mc-desc">60 lieux à travers la planète entière, tous continents confondus.</div>
-            <div class="mc-count">60 lieux · Tous continents</div>
-          </button>
-
-          <button class="mode-card" data-mode="capitals" onclick="selectMode(this,'capitals')">
-            <div class="mc-tag">Capitales</div>
-            <div class="mc-name">Capitales</div>
-            <div class="mc-desc">La vue satellite montre une capitale. Cliquez la bonne parmi 145 pins.</div>
-            <div class="mc-count">145 capitales · Mode pin</div>
-          </button>
-
-          <button class="mode-card" data-mode="france" onclick="selectMode(this,'france')">
-            <div class="mc-tag">France</div>
-            <div class="mc-name">Villes de France</div>
-            <div class="mc-desc">10 grandes métropoles françaises vues du ciel.</div>
-            <div class="mc-count">10 villes · Hexagone</div>
-          </button>
-
-          <button class="mode-card" data-mode="europe" onclick="selectMode(this,'europe')">
-            <div class="mc-tag">Europe</div>
-            <div class="mc-name">Villes d'Europe</div>
-            <div class="mc-desc">10 villes emblématiques du continent européen.</div>
-            <div class="mc-count">10 villes · Continent</div>
-          </button>
-
-          <button class="mode-card" data-mode="timeline" data-timeline-theme="all" onclick="selectMode(this,'timeline')">
-            <div class="mc-tag">Temps</div>
-            <div class="mc-name">Chronologie — tout</div>
-            <div class="mc-desc">Urbanisation, déforestation (Amazonie), agriculture irriguée (Égypte, MO, Amérique du sud, Sénégal) : époques selon le thème.</div>
-            <div class="mc-count">16 lieux</div>
-          </button>
-
-          <button class="mode-card" data-mode="timeline" data-timeline-theme="urban" onclick="selectMode(this,'timeline')">
-            <div class="mc-tag">Temps</div>
-            <div class="mc-name">Urbanisation</div>
-            <div class="mc-desc">Métropoles et littoraux : Actuel, 2020, 2014.</div>
-            <div class="mc-count">7 lieux</div>
-          </button>
-
-          <button class="mode-card" data-mode="timeline" data-timeline-theme="deforestation" onclick="selectMode(this,'timeline')">
-            <div class="mc-tag">Temps</div>
-            <div class="mc-name">Déforestation</div>
-            <div class="mc-desc">Amazonie (Rondônia) : Actuel, 2020, 2014.</div>
-            <div class="mc-count">1 lieu</div>
-          </button>
-
-          <button class="mode-card" data-mode="timeline" data-timeline-theme="agriculture" onclick="selectMode(this,'timeline')">
-            <div class="mc-tag">Temps</div>
-            <div class="mc-name">Agriculture & irrigation</div>
-            <div class="mc-desc">Pivots et grands périmètres : Égypte, Arabie saoudite, Émirats, Jordanie, Mato Grosso, Santa Cruz, vallée du Sénégal — 2014, 2020, actuel (Wayback).</div>
-            <div class="mc-count">8 lieux</div>
-          </button>
-
-        </div>
-
-        <button class="btn-play" id="btn-play" onclick="play()">JOUER</button>
+        <a class="btn-play" href="game.html">JOUER</a>
       </section>
 
       <section class="lp-how" id="how-to-play">
@@ -132,7 +75,7 @@
               <div class="how-num">02</div>
               <div class="how-text">
                 <strong>Devinez</strong>
-                Placez un pin sur le planisphère. En mode Capitales, cliquez directement la bonne capitale parmi les pins.
+                Placez un pin sur le planisphère pour indiquer où se trouve le lieu.
               </div>
             </div>
             <div class="how-sep">—</div>
@@ -140,7 +83,7 @@
               <div class="how-num">03</div>
               <div class="how-text">
                 <strong>Scorez</strong>
-                Plus vous êtes précis, plus vous marquez. Zoomez en arrière pour plus de contexte — mais le multiplicateur baisse définitivement.
+                Plus vous êtes précis, plus vous marquez. Vue fixe à ~1 000 km — pas de zoom à choisir.
               </div>
             </div>
           </div>
@@ -155,24 +98,6 @@
     document.getElementById('bg-video').addEventListener('ended', function () {
       this.pause();
     });
-
-    let selectedMode = 'world';
-    let selectedTimelineTheme = 'all';
-
-    function selectMode(el, mode) {
-      document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('sel'));
-      el.classList.add('sel');
-      selectedMode = mode;
-      selectedTimelineTheme = el.dataset.timelineTheme || 'all';
-    }
-
-    function play() {
-      let url = 'game.html?mode=' + selectedMode;
-      if (selectedMode === 'timeline' && selectedTimelineTheme && selectedTimelineTheme !== 'all') {
-        url += '&theme=' + selectedTimelineTheme;
-      }
-      window.location.href = url;
-    }
   </script>
 
 </body>

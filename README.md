@@ -2,22 +2,12 @@
 
 Jeu de géolocalisation par satellite. Une vue satellite s'affiche — à toi de trouver où tu es dans le monde.
 
-## Modes de jeu
+## Jeu
 
-| Mode | Description |
-|---|---|
-| **Monde libre** | 60 lieux répartis sur toute la planète |
-| **Capitales** | 145 capitales à identifier parmi des pins sur la carte |
-| **Villes de France** | 10 grandes métropoles françaises |
-| **Villes d'Europe** | 10 villes emblématiques du continent |
-| **Chronologie** | Sous-thèmes : tout (28), + **barrages** (5) : bas (août 2022) → haut (juin 2024) → actuel. **Glaciers** : été **2014** → été **2020** → actuel (Wayback). Multiplicateur = **zoom** uniquement. |
-
-## Mécanique de score
-
-- 5 manches par partie, max **5 000 pts** par manche (25 000 au total)
-- Démarrage à **×5** (~10 km de vue)
-- Changer d'échelle (zoom) **réduit définitivement** le multiplicateur (les années en mode Chronologie ne modifient pas le ×)
-- Formule : `score = 1 000 × mult × e^(−km / 2 000)`
+- **Mode unique** : pool mélangé (paysages, capitales, villes, sites chronologiques)
+- **5 manches** par partie, max **1 000 pts** par manche (5 000 au total)
+- Vue satellite fixe à **~1 000 km**
+- Formule : `score = 1 000 × e^(−km / 2 000)`
 
 ## Structure
 
@@ -25,7 +15,7 @@ Jeu de géolocalisation par satellite. Une vue satellite s'affiche — à toi de
 ├── index.html        Landing page
 ├── game.html         Page de jeu
 ├── css/style.css     Styles
-├── data/             Données par mode (+ `timeline.js` : thèmes, lieux, `eras` Wayback)
+├── data/             Données (mixed.js agrège tous les lieux)
 └── js/               Logique de jeu (game.js, scoring.js)
 ```
 
